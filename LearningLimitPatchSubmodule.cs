@@ -1,3 +1,4 @@
+using System;
 using HarmonyLib;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.GameComponents;
@@ -39,11 +40,12 @@ namespace LearningLimitPatch
             ref ExplainedNumber __result)
         {
             float attributelevels = 0F;
+            float focusContribution = Math.Max(focusValue/5F, 0.05F);
             foreach (CharacterAttribute attribute in skill.Attributes)
             {
                 attributelevels += (float) characterAttributes.GetPropertyValue(attribute);
             }
-            __result.LimitMin(attributelevels*0.1F);
+            __result.LimitMin(attributelevels*0.1F / skill.Attributes.Length * focusContribution);
         }
     }
 }
