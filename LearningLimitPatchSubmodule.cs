@@ -9,43 +9,22 @@ namespace LearningLimitPatch
 {
     public class LearningLimitPatchSubmodule : MBSubModuleBase
     {
-        private Harmony _harmony;
-        private const string HarmonyID = "learninglimitpatch";
         protected override void OnSubModuleLoad()
         {
             base.OnSubModuleLoad();
-            _harmony = new Harmony(HarmonyID);
-            Harmony.DEBUG = true;
-            _harmony.PatchAll();
-            
         }
 
         protected override void OnSubModuleUnloaded()
         {
             base.OnSubModuleUnloaded();
-            _harmony.UnpatchAll(HarmonyID);
         }
-    }
-    [HarmonyPatch]
-    public static class LearningLimitPatch
-    {
-        [HarmonyPatch(typeof(DefaultCharacterDevelopmentModel), "CalculateLearningRate")]
-        [HarmonyPostfix]
-        public static void Postfix_CalculateLearningRate(
-            IReadOnlyPropertyOwner<CharacterAttribute> characterAttributes,
-            int focusValue,
-            int skillValue,
-            SkillObject skill,
-            bool includeDescriptions,
-            ref ExplainedNumber __result)
+        protected override void OnGameStart(Game game, IGameStarter gameStarter)
         {
-            float attributelevels = 0F;
-            float focusContribution = Math.Max(focusValue/5F, 0.05F);
-            foreach (CharacterAttribute attribute in skill.Attributes)
+            base.OnGameStart(game, gameStarter);
+            if (game.GameType is Campaign)
             {
-                attributelevels += (float) characterAttributes.GetPropertyValue(attribute);
+                gameStarter.AddModel(new PatchedCharacterDevelopmentModel());
             }
-            __result.LimitMin(attributelevels*0.1F / skill.Attributes.Length * focusContribution);
         }
     }
 }
